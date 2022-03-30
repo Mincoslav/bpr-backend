@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 import azure.functions as func
 from api_app import app
 from azure.functions import AsgiMiddleware
@@ -66,5 +67,35 @@ async def create_user(user_info: User):
         )
 
 
+@app.post("/update_location/", status_code=HTTP_200_OK)
+async def latest_location(latest_location: LatestLocation):
+    latest_location = {
+        "user_uid": latest_location.user_uid,
+        "date": latest_location.date,
+        "user_type": {
+            "victim": latest_location.user_type.victim,
+            "responder": latest_location.user_type.responder
+        },
+        "location": {
+            "type": latest_location.location.type,
+            "coordinates": latest_location.location.coordinates,
+            "last_updated": latest_location.location.last_updated,
+            "country": latest_location.location.country
+        }
+    }
+
+    collection = get_collection(database_name="bpr-backend", collection_name="latest_location")
+    result = post_document(latest_location, collection)
+
+    if result.acknowledged == True:
+        return {
+            "response": HTTP_201_CREATED,
+            "message": "location updated",
+        }
+    else:
+        raise HTTPException(
+            status_code=HTTP_409_CONFLICT,
+            detail="location is fucked"
+        )
 def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     return AsgiMiddleware(app).handle(req, context)
