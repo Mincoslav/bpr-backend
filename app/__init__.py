@@ -10,7 +10,7 @@ from starlette.status import (
     HTTP_409_CONFLICT,
 )
 
-from payload_definitions import ButtonPressEvent, LatestLocation
+from payload_definitions import ButtonPressEvent, EventType, LatestLocation
 from mongo_access_funcs import get_collection, get_document, post_document
 
 tags_metadata = []
@@ -19,6 +19,25 @@ tags_metadata = []
 @app.get("/", status_code=HTTP_200_OK)
 def read_root():
     return {"Hello": "Bachelors"}
+    
+
+# TODO: get location and user data from request and store it in db
+@app.put("/create_alert/", status_code=HTTP_201_CREATED)
+async def create_alert(button_event: ButtonPressEvent):
+    # 1) parse/validate JSON
+
+
+
+    # 2) update DB 
+
+    # 3) get list of nearby responder IDs
+
+    # 3) send alerts to nearby responders
+
+    
+   
+
+    return True
 
 
 # GET methods
@@ -64,10 +83,6 @@ async def log_user_location(user_ID: str):
 #             detail="User couldn't be created"
 #         )
 
-# TODO: get location and user data from request and store it in db
-@app.put("/create_alert/", status_code=HTTP_201_CREATED)
-async def create_alert(button_event: ButtonPressEvent):
-    return True
 
 
 # @app.put("/update_location/", status_code=HTTP_200_OK)

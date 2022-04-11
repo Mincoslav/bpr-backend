@@ -1,3 +1,4 @@
+from typing import Union
 from pydantic import BaseModel, conlist
 from datetime import datetime
 from enum import Enum
@@ -32,5 +33,5 @@ class ButtonPressEvent(BaseModel):
     current_location: Location
     userID: str
     responderID: str
-    status: Status
+    status: Union[Status, None]
     resolved: bool

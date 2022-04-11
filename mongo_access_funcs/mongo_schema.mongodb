@@ -2,6 +2,7 @@ const database = "bpr-backend";
 
 use(database)
 
+// Evenets schema
 db.runCommand({
 	collMod: "events",
 	validator: {
