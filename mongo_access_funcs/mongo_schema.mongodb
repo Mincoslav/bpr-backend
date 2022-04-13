@@ -1,52 +1,67 @@
 const database = "bpr-backend";
 
-use(database)
+use(database);
 
 // Evenets schema
 db.runCommand({
 	collMod: "events",
 	validator: {
 		$jsonSchema: {
-			required: ["event_type", "location", "userID", "responderID", "resolved", "status"],
+			required: [
+				"location",
+				"userID",
+				"responderID",
+				"resolved",
+				"status"
+			],
 			properties: {
-				event_type: {
-					enum: ["Pregnancy", "Crime", "Health Problem", "Fire", "Accident", "Violence"]
+				location: {
+					bsonType: "object",
+					required: [
+						"location_type",
+						"coordinates",
+						"last_updated",
+						"country"
+					],
+					properties: {
+						location_type: {
+							enum: ["Point"]
+						},
+						coordinates: {
+							bsonType: "array",
+							items: {
+								type: "number"
+							},
+							maxItems: 2,
+							minItems: 2
+						},
+						last_updated: {
+							bsonType: "date"
+						},
+						country: {
+							bsonType: "string"
+						}
+					}
 				},
-                location: {
-                    bsonType: "object",
-                    required: ["location_type", "coordinates", "last_updated", "country"],
-                    properties: {
-                        location_type: {
-                            enum: ["Point"]
-                        },
-                        coordinates: {
-                            bsonType: "array",
-                            items: {
-                                type: "number"
-                            },
-                            maxItems: 2,
-                            minItems: 2
-                        },
-                        last_updated: {
-                            bsonType: "timestamp"
-                        },
-                        country: {
-                            bsonType: "string"
-                        }
-                    }
-                },
 				userID: {
 					bsonType: "string"
 				},
-                responderID: {
-                    bsonType: "string"
-                },
-                resolved: {
-                    bsonType: "bool"
-                },
-                status: {
-                    enum: ["Requested", "Accepted", "In progress", "Cancelled", "Resolved", "Safe"]
-                }
+				responderID: {
+					bsonType: "string"
+				},
+				resolved: {
+					bsonType: "bool"
+				},
+				status: {
+					enum: [
+						"received",
+						"message_sent",
+						"message_error",
+                        "accepted",
+						"resolved",
+                        null
+					]
+				}
 			}
 		}
 	}
