@@ -1,3 +1,4 @@
+import sys
 from typing import List, Union
 from pydantic import conlist
 import pymongo
@@ -7,7 +8,8 @@ import os
 
 from payload_definitions import EventType
 
-ATLAS_CONNECTION = os.getenv("ATLAS_CONNECTION_STRING")
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+ATLAS_CONNECTION = os.getenv("ATLAS-CONNECTION-STRING")
 BPR_BACKEND = "bpr-backend"
 EVENT_COLLECTION = "events"
 
