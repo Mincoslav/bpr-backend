@@ -8,7 +8,7 @@ from pymongo.collection import Collection
 from payload_definitions import EventType
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-ATLAS_CONNECTION = os.environ.get("ATLAS-CONNECTION-STRING2")
+ATLAS_CONNECTION = os.environ.get("ATLAS-CONNECTION-STRING")
 BPR_BACKEND = "bpr-backend"
 EVENT_COLLECTION = "events"
 
