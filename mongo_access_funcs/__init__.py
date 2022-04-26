@@ -4,12 +4,11 @@ from pydantic import conlist
 import pymongo
 import os
 from pymongo.collection import Collection
-import os
 
 from payload_definitions import EventType
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-ATLAS_CONNECTION = os.getenv("ATLAS-CONNECTION-STRING")
+ATLAS_CONNECTION = os.environ.get("ATLAS-CONNECTION-STRING2")
 BPR_BACKEND = "bpr-backend"
 EVENT_COLLECTION = "events"
 
