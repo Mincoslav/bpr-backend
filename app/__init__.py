@@ -1,4 +1,3 @@
-from contextlib import nullcontext
 import azure.functions as func
 from api_app import app
 from azure.functions import AsgiMiddleware
@@ -11,7 +10,9 @@ from starlette.status import (
 )
 
 from payload_definitions import ButtonPressEvent
-from mongo_access_funcs import post_document
+from mongo_access_funcs import get_danger_zones_documents, post_document
+from bson.json_util import dumps
+
 
 tags_metadata = []
 
@@ -29,9 +30,9 @@ async def create_alert(button_event: ButtonPressEvent):
 
     # 2) Create event in DB
     result = post_document(button_event)
-    
+
     # TODO: 3) get list of nearby responder IDs
-    
+
     # TODO: 3.5) send alerts to nearby responders
 
     if result.acknowledged == True:
@@ -40,7 +41,9 @@ async def create_alert(button_event: ButtonPressEvent):
             "message": "location updated",
         }
     else:
-        raise HTTPException(status_code=HTTP_409_CONFLICT, detail="event creation failed")
+        raise HTTPException(
+            status_code=HTTP_409_CONFLICT, detail="event creation failed"
+        )
 
 
 @app.put("/update_alert/", status_code=HTTP_200_OK)
@@ -56,6 +59,22 @@ async def update_alert(button_event: ButtonPressEvent):
 @app.get("/location/{user_ID}", status_code=status.HTTP_200_OK)
 async def get_last_known_location_by_userID(user_ID: str):
     return True
+
+
+@app.get("/danger_zones/", status_code=HTTP_200_OK)
+async def get_danger_zones():
+    danger_zones = []
+    results = get_danger_zones_documents()
+
+    for result in results:
+        result_id = str(result.pop("_id"))
+        result["_id"] = result_id
+        danger_zones.append(result)
+
+    if len(danger_zones) > 0:
+        return {"message": HTTP_200_OK, "danger_zones": danger_zones}
+    else:
+        return {"message": HTTP_404_NOT_FOUND, "danger_zones": "No danger zones found"}
 
 
 # POST methods

@@ -35,6 +35,9 @@ def get_document_by_ID(documentID: str, collection: Collection = get_collection(
     return collection.find_one({"_id": "{documentID}".format(documentID)})
 
 
+def get_danger_zones_documents(collection: Collection = get_collection(collection_name="dangerZones")):
+    return collection.find()
+
 def get_documents_within_range(
     coordinates: conlist(float, min_items=2, max_items=2),
     radius: float,
