@@ -31,6 +31,11 @@ class Location(BaseModel):
     country: str
 
 
+class LatestLocation(BaseModel):
+    location: Location
+    userID: str
+
+
 class ButtonPressEvent(BaseModel):
     location: Location
     userID: str
