@@ -26,17 +26,20 @@ def get_collection(
 
 # TODO: maybe add some validation?
 def post_document(
-    document: Union[dict, EventType], collection: Collection = get_collection()
+    document: Union[dict, EventType], collection_name: str
 ):
-    return collection.insert_one(document)
+    return get_collection(collection_name=collection_name).insert_one(document)
 
 
 def get_document_by_ID(documentID: str, collection: Collection = get_collection()):
     return collection.find_one({"_id": "{documentID}".format(documentID)})
 
 
-def get_danger_zones_documents(collection: Collection = get_collection(collection_name="dangerZones")):
+def get_danger_zones_documents(
+    collection: Collection = get_collection(collection_name="dangerZones"),
+):
     return collection.find()
+
 
 def get_documents_within_range(
     coordinates: conlist(float, min_items=2, max_items=2),

@@ -9,9 +9,11 @@ from starlette.status import (
     HTTP_409_CONFLICT,
 )
 
-from payload_definitions import ButtonPressEvent
-from mongo_access_funcs import get_danger_zones_documents, post_document
-from bson.json_util import dumps
+from payload_definitions import ButtonPressEvent, LatestLocation
+from mongo_access_funcs import (
+    get_danger_zones_documents,
+    post_document,
+)
 
 
 tags_metadata = []
@@ -78,9 +80,12 @@ async def get_danger_zones():
 
 
 # POST methods
-@app.post("/location/{user_ID}", status_code=HTTP_201_CREATED)
-async def log_user_location(user_ID: str):
-    document = {}
+@app.put("/update_location/", status_code=HTTP_201_CREATED)
+async def log_user_location(user_location: LatestLocation):
+    response = post_document(document={"location":dict(user_location.location), "userID":user_location.userID}, collection_name="locations")
+    if response.acknowledged:
+        return {"message":HTTP_201_CREATED}
+    else: return {"message":HTTP_409_CONFLICT}
 
 
 def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
