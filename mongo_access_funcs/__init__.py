@@ -5,7 +5,7 @@ import pymongo
 import os
 from pymongo.collection import Collection
 
-from payload_definitions import EventType
+from payload_definitions import EventType, LatestLocation
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 ATLAS_CONNECTION = os.environ["ATLAS_CONNECTION_STRING"]
@@ -26,9 +26,17 @@ def get_collection(
 
 # TODO: maybe add some validation?
 def post_document(
-    document: Union[dict, EventType], collection_name: str
+    document: Union[dict, EventType, LatestLocation], collection_name: str
 ):
     return get_collection(collection_name=collection_name).insert_one(document)
+
+
+def update_location(
+    document: Union[dict, LatestLocation], collection_name: str
+):
+    return get_collection(collection_name=collection_name).update_one(
+        filter={"userID": document["userID"]}, update={"$set": {"location": document["location"]}}, upsert=True
+    )
 
 
 def get_document_by_ID(documentID: str, collection: Collection = get_collection()):

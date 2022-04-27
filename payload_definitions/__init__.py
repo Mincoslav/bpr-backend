@@ -1,4 +1,3 @@
-from typing import Union
 from pydantic import BaseModel, conlist
 from datetime import datetime
 from enum import Enum
