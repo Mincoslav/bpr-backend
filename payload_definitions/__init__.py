@@ -26,17 +26,19 @@ class Status(str,Enum):
 class Location(BaseModel):
     location_type: str  # We might want to keep radius/point so use this to ensure schema integrity
     coordinates: conlist(float, min_items=2, max_items=2)  # lattitude, longitude
+
+
+class LatestLocation(BaseModel):
+    userID: str
+    location: Location
     last_updated: datetime  # or whatever is compatible with Mongo
     country: str
 
 
-class LatestLocation(BaseModel):
-    location: Location
-    userID: str
-
-
 class ButtonPressEvent(BaseModel):
     location: Location
+    last_updated: datetime  # or whatever is compatible with Mongo
+    country: str
     userID: str
     responderID: str
     resolved: bool
