@@ -58,7 +58,7 @@ async def create_alert(button_event: ButtonPressEvent):
     button_event = dict(button_event)
 
     # 2) Create event in DB
-    result = post_document(button_event)
+    result = post_document(document=button_event,collection_name="events" )
 
     # TODO: 3) get list of nearby responder IDs
 
@@ -79,7 +79,9 @@ async def create_alert(button_event: ButtonPressEvent):
 # PUT methods
 @app.put("/update_location/", status_code=HTTP_201_CREATED)
 async def log_user_location(user_location: LatestLocation):
-    response = update_location(document={"location":dict(user_location.location), "userID":user_location.userID}, collection_name="locations")
+    user_location.location = dict(user_location.location)
+    user_location = dict(user_location)
+    response = update_location(document=user_location, collection_name="locations")
     if response.acknowledged:
         return {"message":HTTP_201_CREATED}
     else: raise HTTPException(

@@ -31,11 +31,27 @@ def post_document(
     return get_collection(collection_name=collection_name).insert_one(document)
 
 
-def update_location(
-    document: Union[dict, LatestLocation], collection_name: str
-):
+def update_location(document: Union[dict, LatestLocation], collection_name: str):
     return get_collection(collection_name=collection_name).update_one(
-        filter={"userID": document["userID"]}, update={"$set": {"location": document["location"]}}, upsert=True
+        filter={"userID": document["userID"]},
+        update={
+            "$set": {
+                "userID": document["userID"],
+                "location": document["location"],
+                "last_updated": document["last_updated"],
+                "country": document["country"]
+            }
+        },
+        upsert=True,
+    )
+
+
+# TODO: add the other fields
+def update_event(document: Union[dict, LatestLocation], collection_name: str):
+    return get_collection(collection_name=collection_name).update_one(
+        filter={"userID": document["userID"]},
+        update={"$set": {"location": document["location"]}},
+        upsert=True,
     )
 
 
