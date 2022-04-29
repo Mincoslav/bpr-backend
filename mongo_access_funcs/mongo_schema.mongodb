@@ -2,13 +2,15 @@ const database = "bpr-backend";
 
 use(database);
 
-// Evenets schema
+// Events schema
 db.runCommand({
 	collMod: "events",
 	validator: {
 		$jsonSchema: {
 			required: [
 				"location",
+				"last_updated",
+				"country",
 				"userID",
 				"responderID",
 				"resolved",
@@ -19,9 +21,7 @@ db.runCommand({
 					bsonType: "object",
 					required: [
 						"location_type",
-						"coordinates",
-						"last_updated",
-						"country"
+						"coordinates"
 					],
 					properties: {
 						location_type: {
@@ -35,13 +35,13 @@ db.runCommand({
 							maxItems: 2,
 							minItems: 2
 						},
-						last_updated: {
-							bsonType: "date"
-						},
-						country: {
-							bsonType: "string"
-						}
 					}
+				},
+				last_updated: {
+					bsonType: "date"
+				},
+				country: {
+					bsonType: "string"
 				},
 				userID: {
 					bsonType: "string"
@@ -61,6 +61,53 @@ db.runCommand({
 						"resolved",
                         null
 					]
+				}
+			}
+		}
+	}
+});
+
+
+// Locations schema 
+db.runCommand({
+	collMod: "locations",
+	validator: {
+		$jsonSchema: {
+			required: [
+				"userID",
+				"location",
+				"last_updated",
+				"country"
+			],
+			properties: {
+				userID: {
+					bsonType: "string"
+				},
+				location: {
+					bsonType: "object",
+					required: [
+						"location_type",
+						"coordinates"
+					],
+					properties: {
+						location_type: {
+							enum: ["Point"]
+						},
+						coordinates: {
+							bsonType: "array",
+							items: {
+								type: "number"
+							},
+							maxItems: 2,
+							minItems: 2
+						},
+					}
+				},
+				last_updated: {
+					bsonType: "date"
+				},
+				country: {
+					bsonType: "string"
 				}
 			}
 		}
