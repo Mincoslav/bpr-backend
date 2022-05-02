@@ -20,11 +20,11 @@ db.runCommand({
 				location: {
 					bsonType: "object",
 					required: [
-						"location_type",
+						"type",
 						"coordinates"
 					],
 					properties: {
-						location_type: {
+						type: {
 							enum: ["Point"]
 						},
 						coordinates: {
@@ -86,11 +86,11 @@ db.runCommand({
 				location: {
 					bsonType: "object",
 					required: [
-						"location_type",
+						"type",
 						"coordinates"
 					],
 					properties: {
-						location_type: {
+						type: {
 							enum: ["Point"]
 						},
 						coordinates: {
@@ -113,3 +113,6 @@ db.runCommand({
 		}
 	}
 });
+
+//2dSphere Index
+db.locations.createIndex( { location : "2dsphere" } )
