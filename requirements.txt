@@ -6,3 +6,4 @@ azure-functions
 pymongo[srv]
 fastapi
 pydantic
+firebase-admin
