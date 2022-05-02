@@ -114,5 +114,52 @@ db.runCommand({
 	}
 });
 
+
+// Danger zones schema
+db.runCommand({
+	collMod: "dangerZones",
+	validator: {
+		$jsonSchema: {
+			required: [
+				"location",
+				"last_updated",
+				"country",
+				"radius"
+			],
+			properties: {
+				location: {
+					bsonType: "object",
+					required: [
+						"type",
+						"coordinates"
+					],
+					properties: {
+						type: {
+							enum: ["Point"]
+						},
+						coordinates: {
+							bsonType: "array",
+							items: {
+								type: "number"
+							},
+							maxItems: 2,
+							minItems: 2
+						},
+					}
+				},
+				last_updated: {
+					bsonType: "date"
+				},
+				country: {
+					bsonType: "string"
+				},
+				radius: {
+					bsonType: "int"
+				}
+			}
+		}
+	}
+});
+
 //2dSphere Index
 db.locations.createIndex( { location : "2dsphere" } )
