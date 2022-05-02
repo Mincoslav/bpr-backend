@@ -1,0 +1,11 @@
+db.locations.aggregate([
+    { "$geoNear": {
+        "near": {
+            "type": "Point",
+            "coordinates": [ 9.737673, 55.853649 ]
+        }, 
+        "maxDistance": 10000,
+        "spherical": true,
+        "distanceField": "distance",
+    }}
+]).pretty()

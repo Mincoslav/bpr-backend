@@ -12,6 +12,7 @@ from starlette.status import (
 from payload_definitions import ButtonPressEvent, LatestLocation, Location
 from mongo_access_funcs import (
     get_danger_zones_documents,
+    get_documents_within_range,
     post_document,
     update_location,
 )
@@ -27,8 +28,16 @@ def read_root():
 
 
 @app.get("/nearest_responders/", status_code=status.HTTP_200_OK)
-async def get_nearest_responders(location: Location):
-    return True
+async def get_nearest_responders(location: LatestLocation):
+    nearest_responder = get_documents_within_range(
+        coordinates=location.location.coordinates, userID=location.userID
+    )
+    if nearest_responder is not None:
+        return {"message": HTTP_200_OK, "nearest_responder": nearest_responder}
+    else:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="No responder within range"
+        )
 
 
 @app.get("/danger_zones/", status_code=HTTP_200_OK)
@@ -49,7 +58,6 @@ async def get_danger_zones():
         )
 
 
-
 # POST methods
 @app.post("/create_alert/", status_code=HTTP_201_CREATED)
 async def create_alert(button_event: ButtonPressEvent):
@@ -58,7 +66,7 @@ async def create_alert(button_event: ButtonPressEvent):
     button_event = dict(button_event)
 
     # 2) Create event in DB
-    result = post_document(document=button_event,collection_name="events" )
+    result = post_document(document=button_event, collection_name="events")
 
     # TODO: 3) get list of nearby responder IDs
 
@@ -75,7 +83,6 @@ async def create_alert(button_event: ButtonPressEvent):
         )
 
 
-
 # PUT methods
 @app.put("/update_location/", status_code=HTTP_201_CREATED)
 async def log_user_location(user_location: LatestLocation):
@@ -83,8 +90,9 @@ async def log_user_location(user_location: LatestLocation):
     user_location = dict(user_location)
     response = update_location(document=user_location, collection_name="locations")
     if response.acknowledged:
-        return {"message":HTTP_201_CREATED}
-    else: raise HTTPException(
+        return {"message": HTTP_201_CREATED}
+    else:
+        raise HTTPException(
             status_code=HTTP_409_CONFLICT, detail="location update failed"
         )
 
@@ -96,7 +104,6 @@ async def update_alert(button_event: ButtonPressEvent):
     # 2) update DB
 
     return True
-
 
 
 def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:

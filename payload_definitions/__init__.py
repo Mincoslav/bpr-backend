@@ -24,8 +24,8 @@ class Status(str,Enum):
 
 
 class Location(BaseModel):
-    location_type: str  # We might want to keep radius/point so use this to ensure schema integrity
-    coordinates: conlist(float, min_items=2, max_items=2)  # lattitude, longitude
+    type: str  # We might want to keep radius/point so use this to ensure schema integrity
+    coordinates: conlist(float, min_items=2, max_items=2)  # longitude, lattitude
 
 
 class LatestLocation(BaseModel):

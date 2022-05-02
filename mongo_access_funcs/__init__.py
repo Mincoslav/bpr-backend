@@ -39,7 +39,7 @@ def update_location(document: Union[dict, LatestLocation], collection_name: str)
                 "userID": document["userID"],
                 "location": document["location"],
                 "last_updated": document["last_updated"],
-                "country": document["country"]
+                "country": document["country"],
             }
         },
         upsert=True,
@@ -67,11 +67,26 @@ def get_danger_zones_documents(
 
 def get_documents_within_range(
     coordinates: conlist(float, min_items=2, max_items=2),
-    radius: float,
-    collection: Collection = get_collection(),
+    userID: str,
+    collection: Collection = get_collection(collection_name="locations"),
 ):
-    collection.find({})
-    return True
+    results = collection.aggregate(
+        [
+            {
+                "$geoNear": {
+                    "near": {"type": "Point", "coordinates": coordinates},
+                    "maxDistance": 2000,
+                    "spherical": True,
+                    "distanceField": "distance",
+                }
+            }
+        ]
+    )
+    for result in results:
+        if result["userID"] != userID:
+            result.pop("_id")
+            return result
+    return None
 
 
 # Need to figure out user/requests data models before implementing this.
