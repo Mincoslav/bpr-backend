@@ -33,6 +33,7 @@ class LatestLocation(BaseModel):
     location: Location
     last_updated: datetime  # or whatever is compatible with Mongo
     country: str
+    expo_token: str
 
 
 class ButtonPressEvent(BaseModel):

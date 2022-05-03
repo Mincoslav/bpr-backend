@@ -8,6 +8,7 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
 )
+from notifications import get_app
 
 from payload_definitions import ButtonPressEvent, LatestLocation, Location
 from mongo_access_funcs import (
@@ -56,6 +57,13 @@ async def get_danger_zones():
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND, detail="No danger zones found"
         )
+
+
+@app.get("/send_notification/", status_code=HTTP_200_OK)
+async def send_notification():
+    app = get_app()
+    print(app)
+    return True
 
 
 # POST methods

@@ -40,6 +40,7 @@ def update_location(document: Union[dict, LatestLocation], collection_name: str)
                 "location": document["location"],
                 "last_updated": document["last_updated"],
                 "country": document["country"],
+                "expo_token": document["expo_token"]
             }
         },
         upsert=True,

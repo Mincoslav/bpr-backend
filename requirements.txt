@@ -6,4 +6,4 @@ azure-functions
 pymongo[srv]
 fastapi
 pydantic
-firebase-admin
+exponent_server_sdk
