@@ -77,7 +77,8 @@ db.runCommand({
 				"userID",
 				"location",
 				"last_updated",
-				"country"
+				"country",
+				"expo_token"
 			],
 			properties: {
 				userID: {
@@ -107,6 +108,9 @@ db.runCommand({
 					bsonType: "date"
 				},
 				country: {
+					bsonType: "string"
+				},
+				expo_token: {
 					bsonType: "string"
 				}
 			}
