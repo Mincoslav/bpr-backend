@@ -28,19 +28,6 @@ def read_root():
     return {"Hello": "Bachelors"}
 
 
-@app.get("/nearest_responders/", status_code=status.HTTP_200_OK)
-async def get_nearest_responders(location: LatestLocation):
-    nearest_responder = get_documents_within_range(
-        coordinates=location.location.coordinates, userID=location.userID
-    )
-    if nearest_responder is not None:
-        return {"message": HTTP_200_OK, "nearest_responder": nearest_responder}
-    else:
-        raise HTTPException(
-            status_code=HTTP_404_NOT_FOUND, detail="No responder within range"
-        )
-
-
 @app.get("/danger_zones/", status_code=HTTP_200_OK)
 async def get_danger_zones():
     danger_zones = []
@@ -90,6 +77,19 @@ async def create_alert(button_event: ButtonPressEvent):
             status_code=HTTP_409_CONFLICT, detail="event creation failed"
         )
 
+
+@app.post("/nearest_responders/", status_code=status.HTTP_200_OK)
+async def get_nearest_responders(location: LatestLocation):
+    nearest_responder = get_documents_within_range(
+        coordinates=location.location.coordinates, userID=location.userID
+    )
+    if nearest_responder is not None:
+        return {"message": HTTP_200_OK, "nearest_responder": nearest_responder}
+    else:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="No responder within range"
+        )
+        
 
 # PUT methods
 @app.put("/update_location/", status_code=HTTP_201_CREATED)
