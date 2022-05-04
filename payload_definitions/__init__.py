@@ -20,7 +20,7 @@ class Status(str,Enum):
     accepted = "accepted"
     resolved = "resolved"
     class Config:  
-        use_enum_values = True 
+        use_enum_values = True
 
 
 class Location(BaseModel):

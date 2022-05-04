@@ -8,7 +8,7 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
 )
-from notifications import get_app
+# from notifications import get_app
 
 from payload_definitions import ButtonPressEvent, LatestLocation, Location
 from mongo_access_funcs import (
