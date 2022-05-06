@@ -4,6 +4,7 @@ from pydantic import conlist
 import pymongo
 import os
 from pymongo.collection import Collection
+from pymongo.command_cursor import CommandCursor
 
 from payload_definitions import EventType, LatestLocation
 
@@ -40,7 +41,7 @@ def update_location(document: Union[dict, LatestLocation], collection_name: str)
                 "location": document["location"],
                 "last_updated": document["last_updated"],
                 "country": document["country"],
-                "expo_token": document["expo_token"]
+                "expo_token": document["expo_token"],
             }
         },
         upsert=True,
@@ -66,7 +67,7 @@ def get_danger_zones_documents(
     return collection.find()
 
 
-def get_documents_within_range(
+def get_nearest_responder_from_db(
     coordinates: conlist(float, min_items=2, max_items=2),
     userID: str,
     collection: Collection = get_collection(collection_name="locations"),
@@ -76,7 +77,7 @@ def get_documents_within_range(
             {
                 "$geoNear": {
                     "near": {"type": "Point", "coordinates": coordinates},
-                    "maxDistance": 2000,
+                    # "maxDistance": 2000,
                     "spherical": True,
                     "distanceField": "distance",
                 }
@@ -84,10 +85,46 @@ def get_documents_within_range(
         ]
     )
     for result in results:
+        # print(result)
         if result["userID"] != userID:
             result.pop("_id")
             return result
     return None
+
+
+def get_responders_within_range_from_db(
+    coordinates: conlist(float, min_items=2, max_items=2),
+    userID: str,
+    range: int,
+    collection: Collection = get_collection(collection_name="locations"),
+):
+    results = list(
+        collection.aggregate(
+            [
+                {
+                    "$geoNear": {
+                        "near": {"type": "Point", "coordinates": coordinates},
+                        "maxDistance": range,
+                        "spherical": True,
+                        "distanceField": "distance",
+                    }
+                }
+            ]
+        )
+    )
+    index = 0
+    while index < len(results):
+
+        if results[index]["userID"] == userID:
+            del results[index]
+            index = 0
+            continue
+
+        else:
+            del results[index]["_id"]
+            index += 1
+
+    return results
 
 
 # Need to figure out user/requests data models before implementing this.
