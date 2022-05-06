@@ -8,12 +8,15 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
 )
+from notifications import send_push_message
+
 # from notifications import get_app
 
 from payload_definitions import ButtonPressEvent, LatestLocation, Location
 from mongo_access_funcs import (
     get_danger_zones_documents,
-    get_documents_within_range,
+    get_nearest_responder_from_db,
+    get_responders_within_range_from_db,
     post_document,
     update_location,
 )
@@ -48,8 +51,11 @@ async def get_danger_zones():
 
 @app.get("/send_notification/", status_code=HTTP_200_OK)
 async def send_notification():
-    app = get_app()
-    print(app)
+    response = send_push_message(
+        token="ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
+        message="TESTING NOTIFICATION PUSHING",
+    )
+    print(response)
     return True
 
 
@@ -78,9 +84,9 @@ async def create_alert(button_event: ButtonPressEvent):
         )
 
 
-@app.post("/nearest_responders/", status_code=status.HTTP_200_OK)
-async def get_nearest_responders(location: LatestLocation):
-    nearest_responder = get_documents_within_range(
+@app.post("/nearest_responder/", status_code=status.HTTP_200_OK)
+async def get_nearest_responder(location: LatestLocation):
+    nearest_responder = get_nearest_responder_from_db(
         coordinates=location.location.coordinates, userID=location.userID
     )
     if nearest_responder is not None:
@@ -89,7 +95,20 @@ async def get_nearest_responders(location: LatestLocation):
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND, detail="No responder within range"
         )
-        
+
+
+@app.post("/responders_within_range/", status_code=status.HTTP_200_OK)
+async def get_nearest_responders(location: LatestLocation, range:int=2000):
+    nearest_responder = get_responders_within_range_from_db(
+        coordinates=location.location.coordinates, userID=location.userID, range=range
+    )
+    if nearest_responder is not None:
+        return {"message": HTTP_200_OK, "nearest_responder": nearest_responder}
+    else:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="No responder within range"
+        )
+
 
 # PUT methods
 @app.put("/update_location/", status_code=HTTP_201_CREATED)
