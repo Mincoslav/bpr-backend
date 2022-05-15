@@ -1,6 +1,7 @@
-from email.mime import message
-import azure.functions as func
+# Comment this when running tests
 from api_app import app
+
+import azure.functions as func
 from azure.functions import AsgiMiddleware
 from fastapi import HTTPException, status
 from starlette.status import (
@@ -25,6 +26,9 @@ from mongo_access_funcs import (
 
 tags_metadata = []
 
+# Uncomment these when running tests
+# from fastapi import FastAPI
+# app = FastAPI()
 
 # GET methods
 @app.get("/", status_code=HTTP_200_OK)
@@ -181,5 +185,6 @@ async def accept_alert(button_event: ButtonPressEvent, _id:str):
     return {"status": HTTP_200_OK, "message": "Response accepted and ROH notified"}
 
 
+# Comment this when running tests
 def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     return AsgiMiddleware(app).handle(req, context)
