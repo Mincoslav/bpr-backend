@@ -1,3 +1,4 @@
+from email.mime import message
 import azure.functions as func
 from api_app import app
 from azure.functions import AsgiMiddleware
@@ -7,18 +8,18 @@ from starlette.status import (
     HTTP_201_CREATED,
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
+    HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from notifications import send_push_message
-
-# from notifications import get_app
-
-from payload_definitions import ButtonPressEvent, LatestLocation, Location
+from payload_definitions import ButtonPressEvent, LatestLocation
 from mongo_access_funcs import (
     get_danger_zones_documents,
+    get_expo_token,
     get_nearest_responder_from_db,
     get_responders_within_range_from_db,
     post_document,
     update_location,
+    accept_event_in_db,
 )
 
 
@@ -49,14 +50,15 @@ async def get_danger_zones():
         )
 
 
-@app.get("/send_notification/", status_code=HTTP_200_OK)
-async def send_notification():
-    response = send_push_message(
-        token="ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
-        message="TESTING NOTIFICATION PUSHING",
-    )
-    print(response)
-    return True
+# ONLY FOR TESTING
+# @app.get("/send_notification/", status_code=HTTP_200_OK)
+# async def send_notification():
+#     response = send_push_message(
+#         token="ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
+#         message="TESTING NOTIFICATION PUSHING",
+#     )
+#     print(response)
+#     return True
 
 
 # POST methods
@@ -66,17 +68,36 @@ async def create_alert(button_event: ButtonPressEvent):
     button_event.location = dict(button_event.location)
     button_event = dict(button_event)
 
+    print(button_event)
+
     # 2) Create event in DB
     result = post_document(document=button_event, collection_name="events")
+    print(result)
+    button_event._id = str(result.inserted_id)
 
     # TODO: 3) get list of nearby responder IDs
+    responders: list = get_responders_within_range_from_db(
+        coordinates=button_event["location"]["coordinates"],
+        userID=button_event["userID"],
+    )
+    print(responders)
 
     # TODO: 3.5) send alerts to nearby responders
+    for responder in responders:  # type: LatestLocation
+        send_push_message(
+            token=responder["expo_token"],
+            message="There's an emergency!",
+            data=button_event,
+        )
+
+    # update user's latest location with the one from button_event
+    # update event status to "message_sent"
+    # result = update_document(....)
 
     if result.acknowledged == True:
         return {
             "response": HTTP_201_CREATED,
-            "message": "location updated",
+            "message": "alert created",
         }
     else:
         raise HTTPException(
@@ -98,12 +119,12 @@ async def get_nearest_responder(location: LatestLocation):
 
 
 @app.post("/responders_within_range/", status_code=status.HTTP_200_OK)
-async def get_nearest_responders(location: LatestLocation, range:int=2000):
-    nearest_responder = get_responders_within_range_from_db(
-        coordinates=location.location.coordinates, userID=location.userID, range=range
+async def get_nearest_responders(location: LatestLocation, distance: int = 2000):
+    nearest_responders = get_responders_within_range_from_db(
+        coordinates=location.location.coordinates, userID=location.userID, distance=distance
     )
-    if nearest_responder is not None:
-        return {"message": HTTP_200_OK, "nearest_responder": nearest_responder}
+    if nearest_responders is not None:
+        return {"message": HTTP_200_OK, "nearest_responder": nearest_responders}
     else:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND, detail="No responder within range"
@@ -124,13 +145,40 @@ async def log_user_location(user_location: LatestLocation):
         )
 
 
-@app.put("/update_alert/", status_code=HTTP_200_OK)
-async def update_alert(button_event: ButtonPressEvent):
+# _id must be provided
+@app.put("/accept_alert/", status_code=HTTP_200_OK)
+async def accept_alert(button_event: ButtonPressEvent, _id:str):
+
     # 1) parse/validate JSON
+    if button_event.responderID == "" or (len(button_event.responderID) < 1):
+        raise HTTPException(
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="responderID is missing. Check your payload.",
+        )
+    # Add the _id from path param into the object
 
+    # Change the location object to dict
+    button_event.location = dict(button_event.location)
+    button_event = dict(button_event)
+    button_event["_id"] = _id
     # 2) update DB
+    accept_result = accept_event_in_db(button_event)
+    print(accept_result)
+    if accept_result.modified_count == 1:
 
-    return True
+        # Notify ROH
+        send_push_message(
+            token=get_expo_token(button_event["userID"], False),
+            message="Request for help accepted by responder",
+            data={},  # Not quite sure what we might want here
+        )
+    else:
+        print(accept_result.raw_result)
+        raise HTTPException(
+            status_code=HTTP_409_CONFLICT, detail="Database update unsucesful."
+        )
+
+    return {"status": HTTP_200_OK, "message": "Response accepted and ROH notified"}
 
 
 def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:

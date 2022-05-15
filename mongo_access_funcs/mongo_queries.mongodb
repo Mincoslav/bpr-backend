@@ -1,11 +1,45 @@
 db.locations.aggregate([
-    { "$geoNear": {
-        "near": {
-            "type": "Point",
-            "coordinates": [ 9.737673, 55.853649 ]
-        }, 
-        "maxDistance": 10000,
-        "spherical": true,
-        "distanceField": "distance",
-    }}
-]).pretty()
+	{
+		$geoNear: {
+			near: {
+				type: "Point",
+				coordinates: [9.737673, 55.853649]
+			},
+			maxDistance: 10000,
+			spherical: true,
+			distanceField: "distance"
+		}
+	},
+	{
+		$group: {
+			_id: "$expo_token",
+			location: { $first: "$location" },
+			userID: { $first: "$userID" },
+			country: { $first: "$country" },
+			last_updated: { $first: "$last_updated" },
+			distance: { $first: "$distance" }
+		}
+	},
+	{ $sort: { distance: 1 } }
+]);
+
+db.events.aggregate([
+	{ $match: { userID: "3cGGYEi5GLRxyROvKRHQPK7Irvy1" } },
+	{
+		$lookup: {
+			from: "locations",
+			localField: "userID",
+			foreignField: "userID",
+			as: "user_location"
+		}
+	}
+]);
+
+db.events.updateOne(
+	{ _id: ObjectId("6276b170bc63c43c2a83f0f4") },
+	{
+		$set: {
+			status: "accepted"
+		}
+	}
+);
