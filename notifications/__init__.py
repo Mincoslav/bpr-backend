@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from exponent_server_sdk import (
     PushClient,
     PushMessage,
@@ -5,6 +6,7 @@ from exponent_server_sdk import (
     DeviceNotRegisteredError,
     PushTicketError,
 )
+from starlette.status import HTTP_418_IM_A_TEAPOT
 
 # sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 # FIREBASE_CONFIG = os.environ.get("FIREBASE_CONFIG")
@@ -12,6 +14,8 @@ from exponent_server_sdk import (
 
 
 def send_push_message(token, message, data=None):
+    # if "ExponentPushToken[" not in token:
+    #     token = "ExponentPushToken[" + token + "]"
     response: PushTicket = PushClient().publish(
         PushMessage(to=token, body=message, data=data)
     )
@@ -22,7 +26,10 @@ def send_push_message(token, message, data=None):
 
     except DeviceNotRegisteredError:
         # TODO: Invalidate the token as innactive
-        return True
+        return HTTPException(
+            status_code=HTTP_418_IM_A_TEAPOT,
+            detail="Device with token {token} not registered".format(token=token),
+        )
 
     except PushTicketError as error:
         return {
@@ -31,6 +38,6 @@ def send_push_message(token, message, data=None):
             "data": data,
             "push_response": dict(error.push_response()),
         }
-    
+
     except ValueError as v_err:
         print(v_err)
