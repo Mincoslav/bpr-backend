@@ -1,6 +1,4 @@
 # Comment this when running tests
-from sqlite3 import Date
-from pydantic import Json
 from api_app import app
 
 import azure.functions as func
@@ -89,7 +87,7 @@ async def create_alert(button_event: ButtonPressEvent):
     print(responders)
 
     try:
-        button_event.last_updated = button_event["last_updated"].strftime() 
+        button_event.last_updated = button_event["last_updated"].strftime("%m/%d/%Y, %H:%M:%S") 
         #3.5) send alerts to nearby responders
         for responder in responders:  # type: LatestLocation
             print(responder)
