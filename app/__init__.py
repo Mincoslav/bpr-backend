@@ -77,7 +77,7 @@ async def create_alert(button_event: ButtonPressEvent):
     # 2) Create event in DB
     result = post_document(document=button_event, collection_name="events")
     print(result)
-    button_event._id = str(result.inserted_id)
+    button_event["_id"] = str(result.inserted_id)
 
     # TODO: 3) get list of nearby responder IDs
     responders: list = get_responders_within_range_from_db(
@@ -167,7 +167,6 @@ async def accept_alert(button_event: ButtonPressEvent, _id:str):
     button_event["_id"] = _id
     # 2) update DB
     accept_result = accept_event_in_db(button_event)
-    print(accept_result)
     if accept_result.modified_count == 1:
 
         # Notify ROH
@@ -177,7 +176,6 @@ async def accept_alert(button_event: ButtonPressEvent, _id:str):
             data={},  # Not quite sure what we might want here
         )
     else:
-        print(accept_result.raw_result)
         raise HTTPException(
             status_code=HTTP_409_CONFLICT, detail="Database update unsucesful."
         )
