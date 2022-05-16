@@ -90,7 +90,7 @@ async def create_alert(button_event: ButtonPressEvent):
         #3.5) send alerts to nearby responders
         for responder in responders:  # type: LatestLocation
             print(responder)
-            send_push_message(
+            message = send_push_message(
                 token=responder["expo_token"],
                 message="There's an emergency!",
                 data=button_event,
@@ -109,7 +109,7 @@ async def create_alert(button_event: ButtonPressEvent):
     # update event status to "message_sent"
     # result = update_document(....)
 
-    if result.acknowledged == True:
+    if result.acknowledged == True and message == True:
         return {
             "response": HTTP_201_CREATED,
             "message": "alert created",

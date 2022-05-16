@@ -6,7 +6,7 @@ from exponent_server_sdk import (
     DeviceNotRegisteredError,
     PushTicketError,
 )
-from starlette.status import HTTP_418_IM_A_TEAPOT
+from starlette.status import HTTP_418_IM_A_TEAPOT, HTTP_404_NOT_FOUND
 
 # sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 # FIREBASE_CONFIG = os.environ.get("FIREBASE_CONFIG")
@@ -16,11 +16,11 @@ from starlette.status import HTTP_418_IM_A_TEAPOT
 def send_push_message(token, message, data=None):
     # if "ExponentPushToken[" not in token:
     #     token = "ExponentPushToken[" + token + "]"
-    response: PushTicket = PushClient().publish(
-        PushMessage(to=token, body=message, data=data)
-    )
 
     try:
+        response: PushTicket = PushClient().publish(
+            PushMessage(to=token, body=message, data=data)
+        )
         print(response)
         return response.is_success
 
@@ -40,4 +40,7 @@ def send_push_message(token, message, data=None):
         }
 
     except ValueError as v_err:
-        print(v_err)
+        return HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Value error {error}".format(error=v_err),
+        )
