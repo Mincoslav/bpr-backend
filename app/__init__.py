@@ -86,8 +86,18 @@ async def create_alert(button_event: ButtonPressEvent):
     )
     print(responders)
 
+    if len(responders) < 1:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="No responders found within 2000m range of long:{long},lat:{lat}".format(
+                long=button_event.location.coordinates[0],
+                lat=button_event.location.coordinates[1],
+            ),
+        )
+
     # TODO: 3.5) send alerts to nearby responders
     for responder in responders:  # type: LatestLocation
+        print(responder)
         send_push_message(
             token=responder["expo_token"],
             message="There's an emergency!",
@@ -125,7 +135,9 @@ async def get_nearest_responder(location: LatestLocation):
 @app.post("/responders_within_range/", status_code=status.HTTP_200_OK)
 async def get_nearest_responders(location: LatestLocation, distance: int = 2000):
     nearest_responders = get_responders_within_range_from_db(
-        coordinates=location.location.coordinates, userID=location.userID, distance=distance
+        coordinates=location.location.coordinates,
+        userID=location.userID,
+        distance=distance,
     )
     if nearest_responders is not None:
         return {"message": HTTP_200_OK, "nearest_responder": nearest_responders}
@@ -151,7 +163,7 @@ async def log_user_location(user_location: LatestLocation):
 
 # _id must be provided
 @app.put("/accept_alert/", status_code=HTTP_200_OK)
-async def accept_alert(button_event: ButtonPressEvent, _id:str):
+async def accept_alert(button_event: ButtonPressEvent, _id: str):
 
     # 1) parse/validate JSON
     if button_event.responderID == "" or (len(button_event.responderID) < 1):
