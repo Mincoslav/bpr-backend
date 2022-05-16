@@ -87,7 +87,7 @@ async def create_alert(button_event: ButtonPressEvent):
     print(responders)
 
     try:
-        button_event.last_updated = button_event["last_updated"].strftime("%m/%d/%Y, %H:%M:%S") 
+        button_event["last_updated"] = button_event["last_updated"].strftime("%m/%d/%Y, %H:%M:%S") 
         #3.5) send alerts to nearby responders
         for responder in responders:  # type: LatestLocation
             print(responder)
