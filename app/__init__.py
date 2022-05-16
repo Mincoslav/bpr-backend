@@ -86,23 +86,24 @@ async def create_alert(button_event: ButtonPressEvent):
     )
     print(responders)
 
-    if len(responders) < 1:
-        raise HTTPException(
-            status_code=HTTP_404_NOT_FOUND,
-            detail="No responders found within 2000m range of long:{long},lat:{lat}".format(
-                long=button_event.location.coordinates[0],
-                lat=button_event.location.coordinates[1],
-            ),
-        )
-
-    # TODO: 3.5) send alerts to nearby responders
-    for responder in responders:  # type: LatestLocation
-        print(responder)
-        send_push_message(
-            token=responder["expo_token"],
-            message="There's an emergency!",
-            data=button_event,
-        )
+    try:
+        #3.5) send alerts to nearby responders
+        for responder in responders:  # type: LatestLocation
+            print(responder)
+            send_push_message(
+                token=responder["expo_token"],
+                message="There's an emergency!",
+                data=button_event,
+            )
+    except KeyError:
+        if len(responders) < 1:
+            raise HTTPException(
+                status_code=HTTP_404_NOT_FOUND,
+                detail="No responders found within 2000m range of long:{long},lat:{lat}".format(
+                    long=button_event.location.coordinates[0],
+                    lat=button_event.location.coordinates[1],
+                ),
+            )
 
     # update user's latest location with the one from button_event
     # update event status to "message_sent"
