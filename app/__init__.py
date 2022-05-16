@@ -91,7 +91,7 @@ async def create_alert(button_event: ButtonPressEvent):
         for responder in responders:  # type: LatestLocation
             print(responder)
             message = send_push_message(
-                token=responder["expo_token"],
+                token=responder["_id"],
                 message="There's an emergency!",
                 data=button_event,
             )
