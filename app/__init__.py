@@ -97,7 +97,7 @@ async def create_alert(button_event: ButtonPressEvent):
             )
     except KeyError:
         if len(responders) < 1:
-            raise HTTPException(
+            return HTTPException(
                 status_code=HTTP_404_NOT_FOUND,
                 detail="No responders found within 2000m range of long:{long},lat:{lat}".format(
                     long=button_event.location.coordinates[0],
