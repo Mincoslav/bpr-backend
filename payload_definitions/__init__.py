@@ -38,7 +38,7 @@ class LatestLocation(BaseModel):
 
 class ButtonPressEvent(BaseModel):
     location: Location
-    last_updated: datetime  # or whatever is compatible with Mongo
+    last_updated: datetime  
     country: str
     userID: str
     responderID: str
