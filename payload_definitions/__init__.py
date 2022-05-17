@@ -13,18 +13,19 @@ class EventType(Enum):
     Violence = "Violence"
 
 
-class Status(str,Enum):
+class Status(str, Enum):
     received = "received"
     message_sent = "message_sent"
     message_error = "message_error"
     accepted = "accepted"
     resolved = "resolved"
-    class Config:  
+
+    class Config:
         use_enum_values = True
 
 
 class Location(BaseModel):
-    type: str  # We might want to keep radius/point so use this to ensure schema integrity
+    type: str
     coordinates: conlist(float, min_items=2, max_items=2)  # longitude, lattitude
 
 
@@ -38,7 +39,7 @@ class LatestLocation(BaseModel):
 
 class ButtonPressEvent(BaseModel):
     location: Location
-    last_updated: datetime  
+    last_updated: datetime
     country: str
     userID: str
     responderID: str
