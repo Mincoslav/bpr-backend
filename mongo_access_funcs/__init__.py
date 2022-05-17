@@ -155,6 +155,8 @@ def get_responders_within_range_from_db(
             results[index]["_id"] = str(results[index]["_id"])
             index += 1
 
+    if len(results) == 0:
+        return None
     return results
 
 
