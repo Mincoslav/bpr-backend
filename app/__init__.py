@@ -1,4 +1,3 @@
-# Comment this when running tests
 from api_app import app
 
 import azure.functions as func

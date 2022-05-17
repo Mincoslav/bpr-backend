@@ -5,7 +5,6 @@ from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_404_NOT_FOUND,
-    HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 import app
@@ -15,15 +14,12 @@ client = TestClient(app.app)
 
 
 def test_read_root():
-
     response = client.get("/")
-    print(response.content)
     assert response.status_code == 200
     assert response.json() == {"Hello": "Bachelors"}
 
 
 def test_get_danger_zones():
-
     response = client.get("/danger_zones/")
     assert response.status_code == 200
     assert response.json() == {
@@ -133,9 +129,9 @@ def test_post_responders_within_range_wrong_param_error():
         "country": "Denmark",
         "expo_token": "ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
     }
-    print(json.dumps(data))
-    response = client.post(url="/responders_within_range/?distance=0", data=json.dumps(data))
-
+    response = client.post(
+        url="/responders_within_range/?distance=0", data=json.dumps(data)
+    )
     assert response.status_code == HTTP_404_NOT_FOUND
 
 
@@ -148,13 +144,28 @@ def test_post_responders_within_range_wrong_format_error():
         "expo_token": "ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
     }
     response = client.post(url="/responders_within_range/", data=json.dumps(data))
-
     assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_put_update_location():
-    assert True
+    data = {
+        "userID": "TESTER_USER",
+        "location": {"type": "Point", "coordinates": [9.838169, 55.862775]},
+        "last_updated": datetime.now().timestamp(),
+        "country": "Denmark",
+        "expo_token": "ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
+    }
+    response = client.put(url="/update_location/", data=json.dumps(data))
+    assert response.status_code == HTTP_201_CREATED
 
 
-def test_put_accept_alert():
-    assert True
+def test_put_update_location_wrong_format_error():
+    data = {
+        "userID": "TESTER_USER",
+        "location": {"type": "Point", "coordinates": [9.838169, 55.862775]},
+        "last_updated": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        "country": "Denmark",
+        "expo_token": "ExponentPushToken[bhz8GWJ9N98LtKk_fN3My1]",
+    }
+    response = client.put(url="/update_location/", data=json.dumps(data))
+    assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
