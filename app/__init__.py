@@ -92,15 +92,14 @@ async def create_alert(button_event: ButtonPressEvent):
                 message="There's an emergency!",
                 data=button_event,
             )
-    except KeyError:
-        if len(responders) < 1:
-            return HTTPException(
-                status_code=HTTP_404_NOT_FOUND,
-                detail="No responders found within 2000m range of long:{long},lat:{lat}".format(
-                    long=button_event.location.coordinates[0],
-                    lat=button_event.location.coordinates[1],
-                ),
-            )
+    except (KeyError, TypeError):
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="No responders found within 2000m range of long:{long},lat:{lat}".format(
+                long=button_event["location"]["coordinates"][0],
+                lat=button_event["location"]["coordinates"][1],
+            ),
+        )
     # 4) return an informative response to the frontend
     if result.acknowledged == True and message == True:
         return {

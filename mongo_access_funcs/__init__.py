@@ -27,9 +27,8 @@ def get_collection(
     return collection
 
 
-# TODO: maybe add some validation?
 def post_document(
-    document: Union[dict, EventType, LatestLocation], collection_name: str
+    document: Union[dict, LatestLocation], collection_name: str
 ):
     return get_collection(collection_name=collection_name).insert_one(document)
 
