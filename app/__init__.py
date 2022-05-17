@@ -72,11 +72,8 @@ async def create_alert(button_event: ButtonPressEvent):
     button_event.location = dict(button_event.location)
     button_event = dict(button_event)
 
-    print(button_event)
-
     # 2) Create event in DB
     result = post_document(document=button_event, collection_name="events")
-    print(result)
     button_event["_id"] = str(result.inserted_id)
 
     # TODO: 3) get list of nearby responder IDs
@@ -84,18 +81,18 @@ async def create_alert(button_event: ButtonPressEvent):
         coordinates=button_event["location"]["coordinates"],
         userID=button_event["userID"],
     )
-    print(responders)
 
     try:
         button_event["last_updated"] = button_event["last_updated"].strftime("%m/%d/%Y, %H:%M:%S") 
         #3.5) send alerts to nearby responders
         for responder in responders:  # type: LatestLocation
-            print(responder)
+            # print(responder)
             message = send_push_message(
                 token=responder["_id"],
                 message="There's an emergency!",
                 data=button_event,
             )
+            print(message)
     except KeyError:
         if len(responders) < 1:
             return HTTPException(

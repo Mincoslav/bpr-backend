@@ -22,7 +22,7 @@ def send_push_message(token, message, data=None):
             PushMessage(to=token, body=message, data=data)
         )
         print(response)
-        return response.is_success
+        return response.is_success()
 
     except DeviceNotRegisteredError:
         # TODO: Invalidate the token as innactive
